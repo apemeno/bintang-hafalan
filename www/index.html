@@ -1227,7 +1227,7 @@ function playAyah(sn,a,quiet,until,btn){
   AUD.src=url;
   if(btn) btn.classList.add('playing');
   AUD.onended=()=>{ if(until && a<until && btn && document.body.contains(btn)) playAyah(sn,a+1,true,until,btn); else if(btn) btn.classList.remove('playing'); };
-  AUD.onerror=()=>{ audioOK=false; if(btn) btn.classList.remove('playing'); if(!quiet){ toast('Suara dibuka di tab baru'); window.open(url,'_blank','noopener'); } };
+  AUD.onerror=()=>{ audioOK=false; if(btn) btn.classList.remove('playing'); if(!quiet){ toast('Suara Syekh Sudais butuh internet. Coba lagi saat online ya.'); } };
   const pr=AUD.play();
   if(pr&&pr.then) pr.then(()=>{audioOK=true;}).catch(e=>{ if(e&&e.name==='NotAllowedError') return; AUD.onerror&&AUD.onerror(); });
 }
