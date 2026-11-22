@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -35,7 +37,7 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           chmod +x gradlew
-          ./gradlew bundleRelease --no-daemon \
+          ./gradlew bundleRelease assembleRelease --no-daemon \
             -Pandroid.injected.signing.store.file=$GITHUB_WORKSPACE/android/app/upload.jks \
             -Pandroid.injected.signing.store.password="$KEYSTORE_PASSWORD" \
             -Pandroid.injected.signing.key.alias="$KEY_ALIAS" \
@@ -44,3 +46,10 @@ jobs:
         with:
           name: bintang-hafalan-aab
           path: android/app/build/outputs/bundle/release/*.aab
+      - name: Publish installable APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp android/app/build/outputs/apk/release/app-release.apk BintangHafalan.apk
+          gh release delete terbaru --yes --cleanup-tag || true
+          gh release create terbaru BintangHafalan.apk --title "Bintang Hafalan (versi uji)" --notes "File APK untuk dicoba langsung di HP Android. Untuk Play Store, gunakan file .aab dari tab Actions." --target ${{ github.sha }}
