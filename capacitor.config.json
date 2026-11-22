@@ -1,0 +1,6 @@
+{
+  "appId": "id.bintanghafalan.app",
+  "appName": "Bintang Hafalan",
+  "webDir": "www",
+  "android": { "backgroundColor": "#EAF7FF" }
+}

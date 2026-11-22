@@ -1,0 +1,25 @@
+BINTANG HAFALAN - PROYEK ANDROID
+================================
+
+Isi folder:
+- www/          : isi aplikasi (game, 30 juz, font) - berjalan tanpa internet
+- android/      : proyek Android Studio
+- node_modules/ : pustaka Capacitor (jangan dihapus)
+
+Cara membuat file .aab untuk Play Store:
+1. Pasang Android Studio (gratis): https://developer.android.com/studio
+2. Buka Android Studio > Open > pilih folder "android" di dalam folder ini.
+   Tunggu proses "Gradle sync" selesai (pertama kali bisa 5-15 menit, perlu internet).
+3. Coba dulu di HP: sambungkan HP dengan kabel USB (aktifkan USB debugging), tekan tombol Run (segitiga hijau).
+4. Menu Build > Generate Signed App Bundle / APK > pilih "Android App Bundle" > Next.
+5. Pada "Key store path" pilih "Create new...":
+   - simpan file .jks di tempat aman (misalnya Google Drive pribadi), JANGAN SAMPAI HILANG
+   - isi kata sandi dan nama Anda, lalu OK
+6. Pilih "release" > Create. File .aab ada di android/app/release/app-release.aab
+7. Unggah file .aab itu ke Play Console (Uji tertutup > Buat rilis baru).
+
+Saat memperbarui aplikasi nanti:
+- naikkan versionCode (1 -> 2 -> 3 ...) dan versionName di android/app/build.gradle
+- buat .aab lagi dengan file .jks yang SAMA
+
+ID aplikasi: id.bintanghafalan.app (tidak bisa diganti setelah diunggah ke Play Store)

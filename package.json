@@ -1,0 +1,15 @@
+{
+  "name": "bintang-hafalan",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Bintang Hafalan - game hafalan Al-Qur'an untuk anak",
+  "scripts": { "sync": "cap sync android" },
+  "dependencies": {
+    "@capacitor/android": "8.6.0",
+    "@capacitor/app": "8.1.2",
+    "@capacitor/core": "8.6.0",
+    "@capacitor/filesystem": "8.1.5",
+    "@capacitor/share": "8.0.3"
+  },
+  "devDependencies": { "@capacitor/cli": "8.6.0" }
+}
