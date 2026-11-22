@@ -318,6 +318,23 @@ body.has-tabs .jump{bottom:calc(92px + env(safe-area-inset-bottom,0px))}
 .gtop .progress{flex:1;margin:0}
 .combo{display:inline-flex;align-items:center;gap:.25rem;font-family:var(--f-disp);font-weight:800;font-size:1.05rem;color:#fff;background:linear-gradient(135deg,#FF922B,#F03E3E);border-radius:999px;padding:.15rem .7rem .15rem .45rem;box-shadow:0 3px 0 #C92A2A;white-space:nowrap;visibility:hidden}
 .combo.on{visibility:visible}
+.setor-ayat .ar{font-size:1.9rem;line-height:2.3;direction:rtl;text-align:center}
+.setor-ayat .tr{text-align:center;margin-top:.4rem}
+.sw{display:inline-block;border-radius:10px;padding:0 .2rem;transition:all .25s}
+.sw.hid{color:transparent;background:var(--sky2);text-shadow:0 0 12px rgba(80,90,140,.55);min-width:2.2rem}
+.sw.peek{color:var(--muted)}
+.sw.ok{color:#2B8A3E;background:#D3F9D8;animation:pop .3s ease}
+.sw.miss{color:#C92A2A;background:#FFE3E3;text-decoration:underline wavy #FA5252 1px}
+.micwrap{display:flex;flex-direction:column;align-items:center;gap:.5rem;margin:1rem 0 .4rem}
+.mic{width:92px;height:92px;border-radius:50%;border:none;background:linear-gradient(135deg,#FF6B6B,#E03131);color:#fff;display:grid;place-items:center;box-shadow:0 6px 0 #A61E1E;cursor:pointer}
+.mic svg{width:44px;height:44px}
+.mic.on{animation:micpulse 1.2s infinite;background:linear-gradient(135deg,#51CF66,#2F9E44);box-shadow:0 6px 0 #1E6E2E}
+.mic:disabled{opacity:.45;cursor:default}
+@keyframes micpulse{0%{box-shadow:0 6px 0 #1E6E2E,0 0 0 0 rgba(81,207,102,.55)}100%{box-shadow:0 6px 0 #1E6E2E,0 0 0 26px rgba(81,207,102,0)}}
+.micst{font-weight:800;text-align:center}
+.heard{font-family:var(--f-ar);direction:rtl;color:var(--muted);font-size:1.15rem;min-height:1.6rem;text-align:center;max-width:100%}
+.setor-btns{flex-wrap:wrap}
+
 .wprev{direction:rtl;text-align:right;font-family:var(--f-ar);font-size:1.3rem;line-height:1.9;color:var(--muted);opacity:.8;margin:0 .3rem .3rem}
 .audrow{display:flex;justify-content:center;margin:.1rem 0 .9rem}
 .audbtn{display:inline-flex;align-items:center;gap:.45rem;padding:.55rem 1rem;font-size:.95rem}
@@ -716,7 +733,7 @@ function pathHTML(){
 
 // ---------- screens ----------
 let state = {screen:'home'};
-function go(s){ try{stopAudio()}catch(e){} state=s; render(); if(s.focus){ const c=document.getElementById('curnode'); if(c){ c.scrollIntoView({block:'center'}); return; } } window.scrollTo(0,0); }
+function go(s){ try{stopAudio()}catch(e){} try{SPEECH.stop(true)}catch(e){} state=s; render(); if(s.focus){ const c=document.getElementById('curnode'); if(c){ c.scrollIntoView({block:'center'}); return; } } window.scrollTo(0,0); }
 
 function render(){
   if(state.screen!=='home') document.body.classList.remove('has-tabs');
@@ -725,6 +742,7 @@ function render(){
   if(state.screen==='surah') return surah(state.n);
   if(state.screen==='baca') return baca(state.n);
   if(state.screen==='game') return game();
+  if(state.screen==='setor') return setor(state.n);
 }
 
 
@@ -851,6 +869,7 @@ const SHOP=[
   {id:'hint',name:'Petunjuk ×3',desc:'Di permainan, petunjuk menghapus satu jawaban yang salah atau menunjukkan ayat berikutnya.',price:30,color:'#FAB005'},
   {id:'gold',name:'Bingkai Nama Emas',desc:'Namamu tampil dengan bingkai emas di halaman depan.',price:100,color:'#F59F00'}
 ];
+ICONS.setor='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M9 21h6"/></svg>';
 const SHOP_ICON={
   freeze:'<svg viewBox="0 0 48 48"><path d="M24 4l4 8 8-3-3 8 8 4-8 4 3 8-8-3-4 8-4-8-8 3 3-8-8-4 8-4-3-8 8 3z" fill="#74C0FC" stroke="#1C7ED6" stroke-width="2" stroke-linejoin="round"/><circle cx="24" cy="24" r="6" fill="#E7F5FF"/></svg>',
   hint:'<svg viewBox="0 0 48 48"><path d="M24 6a13 13 0 0 0-8 23v5h16v-5a13 13 0 0 0-8-23z" fill="#FFD43B" stroke="#E67700" stroke-width="2"/><rect x="17" y="36" width="14" height="5" rx="2" fill="#E67700"/><path d="M20 22l4 4 4-4" stroke="#E67700" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>',
@@ -1021,6 +1040,7 @@ function surah(n){
       <div class="surah-head"><div class="ar" lang="ar">${s.ar}</div><div style="font-weight:800">${esc(s.lat)}</div><div class="smeta">${esc(s.id)}</div></div>
       <div class="acts">
         ${act('baca','Baca & Hafal',`Baca per ayat, lalu tutup dan ingat. ${hafal}/${s.v.length} ayat ditandai hafal.`,null)}
+        ${act('setor','Setor Hafalan','Baca hafalanmu dengan suara. Kata yang benar muncul hijau.',null)}
         ${act('susun',GAMES.susun.name,GAMES.susun.desc,r.s.susun||0)}
         ${act('lengkapi',GAMES.lengkapi.name,GAMES.lengkapi.desc,r.s.lengkapi||0)}
         ${act('lanjut',GAMES.lanjut.name,GAMES.lanjut.desc,r.s.lanjut||0)}
@@ -1031,7 +1051,7 @@ function surah(n){
   </main>`;
   bindBack();
   $app.querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>{
-    const k=b.dataset.act; if(k==='baca') go({screen:'baca',n}); else startGame(n,k);
+    const k=b.dataset.act; if(k==='baca') go({screen:'baca',n}); else if(k==='setor') go({screen:'setor',n,si:0}); else startGame(n,k);
   });
 }
 
@@ -1238,6 +1258,148 @@ document.addEventListener('click',e=>{
   const [sn,a,u]=b.dataset.aud.split(':').map(Number);
   playAyah(sn,a,false,u||0,b);
 });
+
+// ---------- Setor Hafalan: pengenalan suara, cek kata demi kata ----------
+const AR_DIAC=/[ؐ-ًؚ-ٰٟۖ-ۭـ]/g;
+function arNorm(w){
+  return w.replace(AR_DIAC,'').replace(/[ٱأإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/ؤ/g,'و').replace(/ئ/g,'ي').replace(/[^ء-ي]/g,'');
+}
+function arSkel(w){ return arNorm(w).replace(/[اويء]/g,''); }
+function lev(a,b){ const m=a.length,n=b.length; if(!m) return n; if(!n) return m; let p=Array.from({length:n+1},(_,j)=>j);
+  for(let i=1;i<=m;i++){ const c=[i]; for(let j=1;j<=n;j++) c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1)); p=c; } return p[n]; }
+function wordMatch(target,heard){
+  const a=arNorm(target), b=arNorm(heard); if(!a||!b) return false;
+  if(a===b) return true;
+  const sa=arSkel(target), sb=arSkel(heard); if(sa&&sa===sb) return true;
+  const L=Math.max(a.length,b.length); return L>=3 && lev(a,b)/L<=0.3;
+}
+// cocokkan urutan kata ayat dengan kata yang terdengar (boleh ada sisipan/lompatan kecil)
+function alignWords(target, heardText){
+  const H=heardText.split(/\s+/).filter(Boolean); const ok=new Array(target.length).fill(false);
+  let j=0;
+  for(let i=0;i<target.length && j<H.length;i++){
+    let found=-1;
+    for(let k=j;k<Math.min(H.length,j+4);k++){
+      if(wordMatch(target[i],H[k])){ found=k; break; }
+      if(k+1<H.length && wordMatch(target[i],H[k]+H[k+1])){ found=k+1; break; } // kata yang terpisah
+    }
+    if(found>=0){ ok[i]=true; j=found+1; }
+  }
+  return ok;
+}
+const CapSR=(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform())?Capacitor.registerPlugin('SpeechRecognition'):null;
+const SPEECH={
+  kind:null, d:null, rec:null, on:false, base:'', cur:'', cb:null, endCb:null, subs:[],
+  prepare(){
+    if(this.kind) return Promise.resolve(this.kind);
+    if(this._p) return this._p;
+    this._p=(async()=>{
+      if(CapSR){ this.kind='native'; return this.kind; }
+      if(window.claude && typeof window.claude.use==='function'){
+        try{ const d=await Promise.race([window.claude.use('dictation'),new Promise(r=>setTimeout(()=>r(null),5000))]); if(d){ this.d=d; this.kind='claude'; this.hookClaude(); return this.kind; } }catch(e){}
+      }
+      const R=window.SpeechRecognition||window.webkitSpeechRecognition;
+      this.kind=R?'web':'none'; return this.kind;
+    })();
+    return this._p;
+  },
+  text(){ return (this.base+' '+this.cur).trim(); },
+  emit(){ if(this.cb) this.cb(this.text()); },
+  ended(){ this.base=this.text(); this.cur=''; const was=this.on; this.on=false; if(was&&this.endCb) this.endCb(); },
+  hookClaude(){
+    const d=this.d;
+    d.onPartial(({text})=>{ this.cur=text||''; this.emit(); });
+    d.onFinal(({text})=>{ this.base=(this.base+' '+(text||'')).trim(); this.cur=''; this.emit(); });
+    d.onState(({state:s})=>{ if(s==='idle') this.ended(); });
+  },
+  reset(){ this.base=''; this.cur=''; },
+  start(onText,onEnd){
+    this.cb=onText; this.endCb=onEnd; this.on=true;
+    if(this.kind==='claude'){
+      this.d.start({language:'ar'}).catch(e=>{ this.on=false; const c=e&&e.code; toast(c==='not_granted'?'Izin mikrofon ditolak':'Mikrofon belum bisa dipakai di sini'); if(onEnd) onEnd(); });
+    } else if(this.kind==='web'){
+      const R=window.SpeechRecognition||window.webkitSpeechRecognition; const r=new R(); this.rec=r;
+      r.lang='ar-SA'; r.continuous=true; r.interimResults=true;
+      const before=this.base;
+      r.onresult=e=>{ let s=''; for(let i=0;i<e.results.length;i++) s+=e.results[i][0].transcript+' '; this.base=before; this.cur=s.trim(); this.emit(); };
+      r.onerror=e=>{ if(e.error==='not-allowed'||e.error==='service-not-allowed') toast('Izin mikrofon ditolak'); else if(e.error==='network') toast('Pengenalan suara butuh internet'); };
+      r.onend=()=>this.ended();
+      try{ r.start(); }catch(e){ this.on=false; toast('Mikrofon belum bisa dipakai'); }
+    } else if(this.kind==='native'){
+      (async()=>{
+        try{
+          let p=await CapSR.checkPermissions(); if(p.speechRecognition!=='granted') p=await CapSR.requestPermissions();
+          if(p.speechRecognition!=='granted'){ this.on=false; toast('Izinkan mikrofon untuk Setor Hafalan'); if(onEnd) onEnd(); return; }
+          const av=await CapSR.available(); if(!av||!av.available){ this.on=false; toast('Pengenalan suara tidak tersedia di HP ini'); if(onEnd) onEnd(); return; }
+          await CapSR.removeAllListeners();
+          await CapSR.addListener('partialResults',d=>{ this.cur=(d.matches&&d.matches[0])||''; this.emit(); });
+          await CapSR.addListener('listeningState',d=>{ if(d.status==='stopped') this.ended(); });
+          await CapSR.start({language:'ar-SA',maxResults:1,partialResults:true,popup:false});
+        }catch(e){ this.on=false; toast('Pengenalan suara gagal. Pastikan ada internet.'); if(onEnd) onEnd(); }
+      })();
+    }
+  },
+  stop(silent){
+    if(!this.on) return; if(silent){ this.endCb=null; this.cb=null; }
+    if(this.kind==='claude') this.d.stop().catch(()=>{});
+    else if(this.kind==='web' && this.rec) try{ this.rec.stop(); }catch(e){}
+    else if(this.kind==='native') CapSR.stop().catch(()=>{});
+    if(silent) this.on=false;
+  }
+};
+function setor(n){
+  const s=BYN[n], r=rec(n); r.h=r.h||[];
+  const si=Math.min(state.si||0,s.v.length-1);
+  const words=s.v[si][0].split(/\s+/).filter(Boolean);
+  const st=state; st.res=st.res||null;
+  const okArr=st.res?st.res.ok:new Array(words.length).fill(false);
+  const done=!!st.res && st.res.final;
+  const wHTML=words.map((w,i)=>{ const ok=okArr[i]; const cls=ok?'ok':(done?'miss':(st.peek?'peek':'hid')); return `<span class="sw ${cls}">${w}</span>`; }).join(' ');
+  const passed=r.h.includes(si+1);
+  const score=st.res?okArr.filter(Boolean).length:0, pct=Math.round(score/words.length*100);
+  $app.innerHTML = top('Setor Hafalan', `${esc(s.lat)} · ayat ${s.off+si+1} dari ${s.off+s.v.length}`, 'surah') + `
+  <main class="wrap" style="padding-top:.25rem">
+    <div class="progress" aria-hidden="true"><i style="width:${Math.round(si/s.v.length*100)}%"></i></div>
+    <p class="prompt">Tekan mikrofon, lalu baca ayat ke-${s.off+si+1} dari hafalanmu. Kata yang benar akan muncul hijau.${passed?' <span class="smeta">(sudah lulus)</span>':''}</p>
+    <div class="panel setor-ayat"><div class="ar" lang="ar">${wHTML} <span class="mark">﴿${arNum(s.off+si+1)}﴾</span></div><div class="tr">${esc(s.v[si][1])}</div></div>
+    <div class="micwrap"><button class="mic ${SPEECH.on?'on':''}" id="mic" aria-label="${SPEECH.on?'Berhenti':'Mulai bicara'}">${ICONS.setor}</button>
+      <div class="micst" id="micst">${SPEECH.on?'Mendengarkan… baca dengan jelas':(done?`${score} dari ${words.length} kata benar (${pct}%)`:'Siap mendengarkan')}</div>
+      <div class="heard" id="heard" lang="ar">${esc(SPEECH.text())}</div></div>
+    <div class="feedback ${done?(pct>=80?'good':'bad'):''}" id="fb">${done?(pct>=80?nm(pick(['MasyaAllah, lulus!','Hebat, hafalanmu benar!','Barakallah, lulus!'])):'Belum lulus. Dengarkan lagi, lalu coba ulangi.'):''}</div>
+    <div class="btns setor-btns">
+      <button class="btn alt" id="peek">${st.peek?'Tutup ayat':'Intip ayat'}</button>
+      <button class="btn alt" id="again">Ulangi</button>
+      ${si<s.v.length-1?`<button class="btn next" id="nextA">Ayat berikutnya</button>`:`<button class="btn next" id="finish">Selesai</button>`}
+    </div>
+    ${audioBtn(s.sn,s.off+si+1)}
+    <p class="smeta" style="text-align:center">Pemeriksaan ini mencocokkan kata, belum menilai tajwid dan makhraj. Butuh internet.</p>
+  </main>`;
+  bindBack(n);
+  const heard=document.getElementById('heard'), micst=document.getElementById('micst');
+  const live=txt=>{ heard.textContent=txt; const ok=alignWords(words,txt); st.res={ok,final:false};
+    $app.querySelectorAll('.sw').forEach((el,i)=>{ if(ok[i]&&!el.classList.contains('ok')){ el.className='sw ok'; } }); };
+  const finish=()=>{
+    const ok=alignWords(words,SPEECH.text()); st.res={ok,final:true};
+    const sc=ok.filter(Boolean).length, p=sc/words.length;
+    if(p>=0.8){ if(!r.h.includes(si+1)){ r.h.push(si+1); const D=day(), key=n+':'+(si+1); if(!D.hk.includes(key)){ D.hk.push(key); const res=bump({hafal:1}); setTimeout(()=>announce(res),1500);} } save(); sWin(); burst(); }
+    else if(SPEECH.text()) sBad();
+    setor(n);
+  };
+  SPEECH.prepare().then(k=>{ if(k==='none'){ micst.textContent='Perangkat ini belum mendukung pengenalan suara. Coba di aplikasi Android atau Chrome.'; document.getElementById('mic').disabled=true; } });
+  document.getElementById('mic').onclick=()=>{
+    if(SPEECH.on){ SPEECH.stop(); return; }
+    if(!SPEECH.kind){ toast('Sebentar, mikrofon sedang disiapkan…'); return; }
+    if(SPEECH.kind==='none') return;
+    if(st.res&&st.res.final){ SPEECH.reset(); st.res=null; setor(n); }
+    stopAudio();
+    SPEECH.start(live, finish);
+    const m=document.getElementById('mic'); m.classList.add('on'); document.getElementById('micst').textContent='Mendengarkan… baca dengan jelas';
+  };
+  document.getElementById('peek').onclick=()=>{ st.peek=!st.peek; setor(n); };
+  document.getElementById('again').onclick=()=>{ SPEECH.stop(true); SPEECH.reset(); st.res=null; setor(n); };
+  const nx=document.getElementById('nextA'); if(nx) nx.onclick=()=>{ SPEECH.stop(true); SPEECH.reset(); go({screen:'setor',n,si:si+1}); };
+  const fi=document.getElementById('finish'); if(fi) fi.onclick=()=>{ SPEECH.stop(true); SPEECH.reset(); toast('Setor hafalan selesai. '+r.h.length+'/'+s.v.length+' ayat lulus'); go({screen:'surah',n}); };
+}
 // ---------- combo ----------
 const COMBO_WORD={3:'Mantap!',5:'Hebat!',8:'Luar biasa!',10:'MasyaAllah!',15:'Super!',20:'Juara!'};
 function comboHit(){
